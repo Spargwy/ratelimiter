@@ -45,12 +45,12 @@ func (rl *RateLimiter) Allow(action, key string) (bool, error) {
 		return false, errors.New("limit not set for action")
 	}
 
-	now := time.Now()
 	actions, exists := rl.actions[action]
 	if !exists {
 		return false, errors.New("action not set")
 	}
 
+	now := time.Now()
 	timestamps := actions[key]
 	var newTimestamps []time.Time
 
@@ -59,6 +59,9 @@ func (rl *RateLimiter) Allow(action, key string) (bool, error) {
 			newTimestamps = append(newTimestamps, timestamp)
 		}
 	}
+
+	// delete old data
+	actions[key] = newTimestamps
 
 	if len(newTimestamps) >= limit.Count {
 		return false, nil
